@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume Maker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Source+Serif+4:wght@400;600;700&display=swap">
+<style>
+:root{--ink:#14213d;--bg:#eef2f6;--panel:#fff;--accent:#0b7a75;--warn:#b45309;--line:#d5dce6;--muted:#5b6678}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 'Plus Jakarta Sans',system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--ink);color:#fff}
+header b{font-size:18px;font-weight:800}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px;padding:9px 16px;background:var(--accent);color:#fff;font-weight:600}
+button.ghost{background:transparent;color:inherit;border:1px solid currentColor}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f5b942;outline-offset:1px}
+input,textarea{width:100%;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);margin-bottom:8px}
+label{font-weight:600;font-size:13px;display:block;margin-bottom:3px}
+h2{font-size:16px;margin:18px 0 8px}
+.hide{display:none!important}
+#auth{max-width:380px;margin:60px auto;background:var(--panel);padding:28px;border-radius:10px;border:1px solid var(--line)}
+#auth h1{margin:0 0 4px;font-size:24px}
+.tabs{display:flex;gap:8px;margin:16px 0}
+.tabs button{flex:1;background:#e3e9f0;color:var(--ink)}
+.tabs button.on{background:var(--ink);color:#fff}
+.err{color:#b42318;min-height:20px;font-size:13px}
+main{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;padding:20px;max-width:1300px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.row{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px;background:#f8fafc}
+.row input,.row textarea{margin-bottom:6px}
+.score{display:flex;gap:18px;align-items:center;margin-bottom:12px}
+.big{font-size:44px;font-weight:800;line-height:1}
+.stars{font-size:22px;color:#e0a100;letter-spacing:2px}
+.lvl{color:var(--muted);font-size:13px}
+.bar{height:8px;background:#e3e9f0;border-radius:4px;overflow:hidden;margin:3px 0 10px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.tip{border-left:4px solid var(--warn);background:#fff7ed;padding:8px 12px;margin-bottom:8px;border-radius:0 6px 6px 0;font-size:14px}
+.tip b{color:var(--warn)}
+.good{border-left-color:var(--accent);background:#ecfdf8}
+#resume{background:#fff;border:1px solid var(--line);padding:36px 40px;font-family:'Source Serif 4',Georgia,serif;font-size:14.5px;line-height:1.55;margin-top:16px;min-height:300px;overflow-wrap:anywhere}
+#resume h1{margin:0;font-size:30px}
+#resume .sub{color:var(--muted);margin-bottom:10px}
+#resume h3{margin:16px 0 4px;font-size:15px;border-bottom:2px solid var(--ink);padding-bottom:2px}
+#resume .it{display:flex;justify-content:space-between;gap:10px;font-weight:700}
+#resume ul{margin:4px 0 8px 18px;padding:0}
+@media print{header,main>div:first-child,.panel:not(.keep),#score,.noprint{display:none!important}
+ body{background:#fff}main{display:block;padding:0}#resume{border:0;margin:0;padding:0}.keep{border:0;padding:0}}
+
+select{width:100%;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:8px;background:#fff;color:var(--ink)}
+#resume{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+#resume h3{border-bottom-color:var(--ra);color:var(--ra)}
+#resume.t-minimal{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+#resume.t-minimal h3{border:0;font-size:13px;letter-spacing:.05em}
+#resume.t-minimal h1{font-weight:600}
+#resume.t-bold .hd{background:var(--ra);color:#fff;margin:-36px -40px 14px;padding:26px 40px}
+#resume.t-bold .hd .sub{color:#e8eef5;margin-bottom:2px}
+#resume.t-modern{font-family:'Plus Jakarta Sans',system-ui,sans-serif;padding:0;overflow:hidden}
+#resume.t-modern .cols{display:grid;grid-template-columns:32% 1fr;min-height:560px}
+#resume.t-modern aside{background:var(--ra);color:#fff;padding:32px 20px;font-size:13.5px}
+#resume.t-modern aside h3{color:#fff;border-bottom:1px solid rgba(255,255,255,.5)}
+#resume.t-modern aside div{margin-bottom:4px}
+#resume.t-modern .mn{padding:32px 30px}
+@media(max-width:600px){#resume.t-modern .cols{grid-template-columns:1fr}}
+@media print{#resume.t-bold .hd{margin:0 0 14px}}
+</style>
+</head>
+<body>
+<header><b>Resume Maker</b><div id="who" class="hide"><span id="uname"></span> <button class="ghost" id="logout">Log out</button> <button class="ghost" id="del">Delete account</button></div></header>
+
+<!-- LOGIN / SIGN UP -->
+<section id="auth">
+  <h1>Your profile</h1>
+  <div class="lvl">Log in to save and edit your resume.</div>
+  <div class="tabs"><button id="tSign" class="on">Sign up</button><button id="tLog">Log in</button></div>
+  <div id="nameWrap"><label for="aName">Full name</label><input id="aName" autocomplete="name"></div>
+  <label for="aMail">Email</label><input id="aMail" type="email" autocomplete="email">
+  <label for="aPass">Password (6+ characters)</label><input id="aPass" type="password" autocomplete="current-password">
+  <div class="err" id="aErr" role="alert"></div>
+  <button id="aGo" style="width:100%">Create profile</button>
+</section>
+
+<!-- APP -->
+<main id="app" class="hide">
+  <div class="panel">
+    <h2 style="margin-top:0">Resume style</h2>
+    <label for="f_type">Resume type</label>
+    <select id="f_type"><option value="fresher">Fresher / student</option><option value="experienced">Experienced professional</option><option value="technical">Technical / IT</option></select>
+    <label for="f_template">Template</label>
+    <select id="f_template"><option value="classic">Classic</option><option value="modern">Modern (sidebar)</option><option value="minimal">Minimal</option><option value="bold">Bold header</option></select>
+    <label for="f_color">Accent color</label><input id="f_color" type="color" style="height:38px;padding:2px">
+    <h2>Your details</h2>
+    <label for="f_name">Full name</label><input id="f_name">
+    <label for="f_title">Job title</label><input id="f_title" placeholder="e.g. Junior Web Developer">
+    <label for="f_email">Email</label><input id="f_email" type="email">
+    <label for="f_phone">Phone</label><input id="f_phone">
+    <label for="f_location">City, country</label><input id="f_location">
+    <label for="f_links">Links (LinkedIn, GitHub, portfolio)</label><input id="f_links" placeholder="https://github.com/you">
+    <label for="f_summary">Summary (2–3 sentences)</label><textarea id="f_summary" rows="4"></textarea>
+    <label for="f_skills">Skills (comma separated)</label><textarea id="f_skills" rows="2" placeholder="HTML, CSS, JavaScript, SQL, Git"></textarea>
+    <h2>Experience</h2><div id="expBox"></div><button class="ghost" style="color:var(--accent)" id="addExp">+ Add experience</button>
+    <h2>Education</h2><div id="eduBox"></div><button class="ghost" style="color:var(--accent)" id="addEdu">+ Add education</button>
+    <h2>Projects</h2>
+    <textarea id="f_projects" rows="4" placeholder="One project per line: name – what you built and the result"></textarea>
+    <h2>Certifications</h2><textarea id="f_certs" rows="3" placeholder="One per line: course name – issuer, year"></textarea>
+    <h2>Achievements and awards</h2><textarea id="f_awards" rows="3" placeholder="One per line: hackathon win, scholarship, rank..."></textarea>
+    <h2>Languages</h2><input id="f_languages" placeholder="English, Telugu, Hindi">
+    <h2>Interests</h2><input id="f_interests" placeholder="Chess, open source, photography">
+  </div>
+  <div>
+    <div class="panel" id="score">
+      <div class="score"><div class="big" id="num">0</div>
+        <div><div class="stars" id="stars" aria-label="rating"></div><div class="lvl" id="lvl"></div></div></div>
+      <div id="bars"></div>
+      <h2 style="margin-top:6px">What to improve next</h2>
+      <div id="tips"></div>
+      <h2>Match a job description</h2>
+      <textarea id="jd" rows="4" placeholder="Paste a job description to see how well your resume matches its keywords"></textarea>
+      <div id="jdOut"></div>
+    </div>
+    <div class="panel keep" style="margin-top:16px">
+      <div class="noprint" style="display:flex;justify-content:space-between;align-items:center"><b>Your resume</b><span class="lvl" id="saved" role="status"></span><button id="print">Download PDF</button></div>
+      <div id="resume"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------- API + AUTH (server-side) ---------- */
+let token = LS.get('rm_token', null), mode = 'sign', user = null, D = null, saveTimer;
+async function api(path, method = 'GET', body) {
+  const r = await fetch('/api/' + path, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Something went wrong. Try again.');
+  return j;
+}
+function save() {
+  clearTimeout(saveTimer);
+  $('#saved').textContent = 'Saving…';
+  saveTimer = setTimeout(() => api('resume', 'PUT', D).then(() => $('#saved').textContent = 'Saved ✓').catch(() => $('#saved').textContent = 'Not saved. Is the server running?'), 600);
+}
+function setMode(m) {
+  mode = m;
+  $('#tSign').classList.toggle('on', m === 'sign');
+  $('#tLog').classList.toggle('on', m === 'log');
+  $('#nameWrap').classList.toggle('hide', m === 'log');
+  $('#aGo').textContent = m === 'sign' ? 'Create profile' : 'Log in';
+  $('#aErr').textContent = '';
+}
+$('#tSign').onclick = () => setMode('sign');
+$('#tLog').onclick = () => setMode('log');
+$('#aGo').onclick = async () => {
+  const name = $('#aName').value.trim(), email = $('#aMail').value.trim().toLowerCase(), password = $('#aPass').value;
+  try {
+    const j = await api(mode === 'sign' ? 'signup' : 'login', 'POST', { name, email, password });
+    token = j.token; LS.set('rm_token', token);
+    const me = await api('me');
+    start(me.user, me.resume);
+  } catch (e) { $('#aErr').textContent = e.message; }
+};
+$('#logout').onclick = () => { LS.set('rm_token', null); location.reload(); };
+$('#del').onclick = async () => {
+  if (!confirm('Delete your account and resume permanently? This cannot be undone.')) return;
+  try { await api('account', 'DELETE'); } catch (e) { return alert(e.message); }
+  LS.set('rm_token', null); location.reload();
+};
+
+/* ---------- RESUME DATA ---------- */
+const KEYS = ['type', 'template', 'color', 'name', 'title', 'email', 'phone', 'location', 'links', 'summary', 'skills', 'projects', 'certs', 'awards', 'languages', 'interests'];
+const blank = (n, e) => ({ type: 'fresher', template: 'classic', color: '#14213d', name: n, title: '', email: e, phone: '', location: '', links: '',
+  summary: '', skills: '', projects: '', certs: '', awards: '', languages: '', interests: '',
+  exp: [{ role: '', company: '', years: '', details: '' }], edu: [{ degree: '', school: '', years: '', grade: '' }] });
+
+function start(u, saved) {
+  user = u;
+  D = Object.assign(blank(u.name, u.email), saved || {});
+  $('#auth').classList.add('hide'); $('#app').classList.remove('hide'); $('#who').classList.remove('hide');
+  $('#uname').textContent = user.name;
+  KEYS.forEach(k => $('#f_' + k).value = D[k] || '');
+  drawList('#expBox', 'exp', [['role', 'Job title'], ['company', 'Company'], ['years', 'Years (2023–2025)'], ['details', 'One achievement per line', 1]]);
+  drawList('#eduBox', 'edu', [['degree', 'Degree / course'], ['school', 'College / school'], ['years', 'Years'], ['grade', 'CGPA or percentage (e.g. 8.4 CGPA)']]);
+  update();
+}
+
+function drawList(sel, key, fields) {
+  const box = $(sel);
+  box.innerHTML = D[key].map((r, i) => `<div class="row" data-i="${i}">` + fields.map(([k, p, area]) =>
+    area ? `<textarea data-f="${k}" rows="3" placeholder="${p}" aria-label="${p}">${esc(r[k])}</textarea>`
+         : `<input data-f="${k}" placeholder="${p}" aria-label="${p}" value="${esc(r[k])}">`).join('') +
+    `<button class="ghost" style="color:#b42318;padding:4px 10px" data-del="${i}">Remove</button></div>`).join('');
+  box.oninput = e => { const row = e.target.closest('.row'); if (!row) return; D[key][row.dataset.i][e.target.dataset.f] = e.target.value; update(); };
+  box.onclick = e => { if (e.target.dataset.del === undefined) return; D[key].splice(+e.target.dataset.del, 1); drawList(sel, key, fields); update(); };
+}
+$('#addExp').onclick = () => { D.exp.push({ role: '', company: '', years: '', details: '' }); drawList('#expBox', 'exp', [['role', 'Job title'], ['company', 'Company'], ['years', 'Years (2023–2025)'], ['details', 'One achievement per line', 1]]); };
+$('#addEdu').onclick = () => { D.edu.push({ degree: '', school: '', years: '', grade: '' }); drawList('#eduBox', 'edu', [['degree', 'Degree / course'], ['school', 'College / school'], ['years', 'Years'], ['grade', 'CGPA or percentage (e.g. 8.4 CGPA)']]); };
+KEYS.forEach(k => $('#f_' + k).addEventListener('input', e => { D[k] = e.target.value; update(); }));
+$('#print').onclick = () => window.print();
+
+/* ---------- RESUME PREVIEW ---------- */
+function render() {
+  const L = t => (t || '').split('\n').map(x => x.trim()).filter(Boolean);
+  const C = t => (t || '').split(',').map(x => x.trim()).filter(Boolean);
+  const ul = a => a.length ? `<ul>${a.map(l => `<li>${esc(l)}</li>`).join('')}</ul>` : '';
+  const sec = (h, b) => b ? `<h3>${h}</h3>${b}` : '';
+  const para = (a, sep) => a.length ? `<p style="margin:4px 0">${a.map(esc).join(sep)}</p>` : '';
+  const fr = D.type === 'fresher';
+  const exp = D.exp.filter(e => e.role || e.company).map(e =>
+    `<div class="it"><span>${esc(e.role)}${e.company ? ', ' + esc(e.company) : ''}</span><span>${esc(e.years)}</span></div>${ul(L(e.details))}`).join('');
+  const edu = D.edu.filter(e => e.degree || e.school).map(e =>
+    `<div class="it"><span>${esc(e.degree)}${e.school ? ', ' + esc(e.school) : ''}</span><span>${esc(e.years)}</span></div>${e.grade ? `<div>${esc(e.grade)}</div>` : ''}`).join('');
+  const S = {
+    summary: sec(fr ? 'Career objective' : 'Summary', D.summary ? `<p style="margin:4px 0">${esc(D.summary)}</p>` : ''),
+    skills: sec('Skills', para(C(D.skills), ' · ')),
+    exp: sec(fr ? 'Internships and experience' : 'Experience', exp),
+    projects: sec('Projects', ul(L(D.projects))),
+    education: sec('Education', edu),
+    certs: sec('Certifications', ul(L(D.certs))),
+    awards: sec('Achievements', ul(L(D.awards))),
+    languages: sec('Languages', para(C(D.languages), ', ')),
+    interests: sec('Interests', para(C(D.interests), ', '))
+  };
+  const order = {
+    fresher: ['summary', 'education', 'skills', 'projects', 'exp', 'certs', 'awards', 'languages', 'interests'],
+    experienced: ['summary', 'exp', 'skills', 'projects', 'education', 'certs', 'awards', 'languages', 'interests'],
+    technical: ['summary', 'skills', 'projects', 'exp', 'education', 'certs', 'awards', 'languages', 'interests']
+  }[D.type] || [];
+  const head = `<h1>${esc(D.name) || 'Your name'}</h1><div class="sub">${esc(D.title)}</div>`;
+  const cts = [D.email, D.phone, D.location, D.links].filter(Boolean).map(esc);
+  const R = $('#resume');
+  R.className = 't-' + (D.template || 'classic');
+  R.style.setProperty('--ra', D.color || '#14213d');
+  if (D.template === 'modern') {
+    const side = ['skills', 'languages', 'interests', 'certs'];
+    R.innerHTML = `<div class="cols"><aside>${cts.map(c => `<div>${c}</div>`).join('')}${order.filter(k => side.includes(k)).map(k => S[k]).join('')}</aside>` +
+      `<div class="mn"><div class="hd">${head}</div>${order.filter(k => !side.includes(k)).map(k => S[k]).join('')}</div></div>`;
+  } else {
+    R.innerHTML = `<div class="hd">${head}<div class="sub">${cts.join(' | ')}</div></div>` + order.map(k => S[k]).join('');
+  }
+}
+
+/* ---------- RATING + TIPS ---------- */
+function grade() {
+  const words = t => (t.trim().match(/\S+/g) || []).length;
+  const lines = t => t.split('\n').filter(l => l.trim()).length;
+  const c = [];
+  const filled = [D.name, D.email, D.phone, D.location].filter(x => x.trim()).length;
+  c.push({ label: 'Contact details', max: 10, got: 10 * filled / 4, tip: 'Add every contact field (name, email, phone, city) so recruiters can reach you.' });
+  const sw = words(D.summary);
+  c.push({ label: 'Summary', max: 10, got: sw >= 30 && sw <= 70 ? 10 : sw === 0 ? 0 : sw < 30 ? 10 * sw / 30 : 7,
+    tip: sw === 0 ? 'Write a 2–3 sentence summary: who you are, your strongest skill, and the job you want.' : sw < 30 ? `Your summary has ${sw} words. Expand it to 30–70 words.` : 'Trim your summary to under 70 words.' });
+  const sk = D.skills.split(',').filter(x => x.trim()).length;
+  c.push({ label: 'Skills', max: 12, got: 12 * Math.min(sk / 8, 1), tip: `You listed ${sk} skills. Aim for 8 or more that match the job description.` });
+  const ex = D.exp.filter(e => e.role.trim() && e.company.trim());
+  const bullets = ex.reduce((n, e) => n + lines(e.details), 0);
+  const nums = ex.some(e => /\d/.test(e.details));
+  const need = D.type === 'experienced' ? 2 : 1;
+  c.push({ label: 'Experience', max: 20, got: 8 * Math.min(ex.length / need, 1) + (ex.length ? 6 * Math.min(bullets / (ex.length * 2), 1) : 0) + (nums ? 6 : 0),
+    tip: !ex.length ? (D.type === 'fresher' ? 'Add an internship, freelance or volunteer role. If you have none yet, add more projects.' : 'Add at least one job with title and company.') :
+         bullets < ex.length * 2 ? 'Write at least 2 achievements per role, one per line.' :
+         !nums ? 'Add numbers to your achievements (e.g. "cut load time by 30%", "served 200 users").' : 'Add one more role to show a stronger track record.' });
+  const ed = D.edu.some(e => e.degree.trim() && e.school.trim());
+  const gr = D.edu.some(e => (e.grade || '').trim());
+  c.push({ label: 'Education', max: 10, got: (ed ? 8 : 0) + (gr ? 2 : 0), tip: ed ? 'Add your CGPA or percentage to your education.' : 'Add your degree or course with the college name.' });
+  c.push({ label: 'Projects', max: 12, got: 12 * Math.min(words(D.projects) / 40, 1), tip: 'Add 2 projects, each with what you built, the tools used and the result.' });
+  c.push({ label: 'Online links', max: 6, got: /https?:\/\/|linkedin|github/i.test(D.links) ? 6 : 0, tip: 'Add your LinkedIn or GitHub link so employers can see your work.' });
+  c.push({ label: 'Certifications', max: 8, got: 8 * Math.min(lines(D.certs) / 2, 1), tip: 'Add 2 certifications or online courses (name, issuer, year).' });
+  c.push({ label: 'Achievements', max: 7, got: 7 * Math.min(lines(D.awards) / 2, 1), tip: 'Add 2 achievements: awards, hackathons, scholarships, ranks or leadership roles.' });
+  c.push({ label: 'Languages and interests', max: 5, got: (D.languages.trim() ? 3 : 0) + (D.interests.trim() ? 2 : 0), tip: 'List the languages you speak and a few interests.' });
+  return c;
+}
+function update() {
+  render();
+  const c = grade(), total = Math.round(c.reduce((s, x) => s + x.got, 0));
+  const half = Math.round(total / 10) / 2;
+  $('#num').textContent = total + '/100';
+  $('#stars').textContent = '★'.repeat(Math.floor(half)) + (half % 1 ? '⯪' : '') + '☆'.repeat(5 - Math.ceil(half));
+  $('#stars').setAttribute('aria-label', half + ' out of 5 stars');
+  $('#lvl').textContent = (total < 50 ? 'Needs work' : total < 70 ? 'Fair' : total < 85 ? 'Good' : 'Strong') + ' · ' + half + ' / 5';
+  $('#bars').innerHTML = c.map(x => `<div style="display:flex;justify-content:space-between;font-size:13px"><span>${x.label}</span><span>${Math.round(x.got)}/${x.max}</span></div><div class="bar"><i style="width:${100 * x.got / x.max}%"></i></div>`).join('');
+  const weak = c.filter(x => x.max - x.got >= 1).sort((a, b) => (b.max - b.got) - (a.max - a.got));
+  $('#tips').innerHTML = weak.length
+    ? weak.map(x => `<div class="tip"><b>${x.label} (+${Math.round(x.max - x.got)} pts):</b> ${x.tip}</div>`).join('')
+    : '<div class="tip good">Nothing major left. Tailor the skills and summary to each job you apply for.</div>';
+  matchJD();
+  if (user) save();
+}
+
+/* ---------- JOB DESCRIPTION KEYWORD MATCH ---------- */
+const STOP = new Set('the and for with you your are our will have has this that from they their who what about into over under more most such than then them been being able work working team role job years year experience using use used including must should strong good great plus etc other also any all can per new join looking need needs too essential ability skills required responsibilities candidate'.split(' '));
+function matchJD() {
+  const jd = ($('#jd').value || '').toLowerCase(), out = $('#jdOut');
+  if (jd.trim().length < 30) { out.innerHTML = ''; return; }
+  const freq = {};
+  (jd.match(/[a-z][a-z+#.]{2,}/g) || []).forEach(w => { w = w.replace(/\.+$/, ''); if (w.length > 2 && !STOP.has(w)) freq[w] = (freq[w] || 0) + 1; });
+  const kws = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 15).map(x => x[0]);
+  const text = ($('#resume').innerText || '').toLowerCase();
+  const miss = kws.filter(k => !text.includes(k));
+  const pct = Math.round(100 * (kws.length - miss.length) / (kws.length || 1));
+  out.innerHTML = `<div class="big" style="font-size:28px;margin:8px 0">${pct}% keyword match</div>` + (miss.length
+    ? `<div class="tip"><b>Missing keywords:</b> ${miss.map(esc).join(', ')}. Add the ones you genuinely have to your skills, summary or projects.</div>`
+    : '<div class="tip good">Your resume covers the main keywords in this job description.</div>');
+}
+$('#jd').addEventListener('input', matchJD);
+
+/* auto-login if a valid token exists */
+if (token) api('me').then(me => start(me.user, me.resume)).catch(() => LS.set('rm_token', null));
+</script>
+</body>
+</html>
